@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\OrderRequest;
+use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use Illuminate\Http\Request;
@@ -13,11 +15,16 @@ class OrderController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json([
-            'data' => Order::with('order_details')->get()
-        ]);
+        $orders = order::with('order_detail.product');
+
+        if (request('search')) {
+            $orders = $orders->where('invoice', 'like', '%' . request('search') . '%');
+        }
+
+
+        return new OrderResource($orders->paginate(10));
     }
 
     /**
@@ -36,12 +43,13 @@ class OrderController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(OrderRequest $request)
     {
         $products = json_decode($request->products);
 
         $order = new Order();
 
+        $order->invoice = 'INV' . rand(100, 999) . date('Ymd');
         $order->total_pay = $request->total;
         $order->cash = $request->cash;
 
@@ -57,8 +65,6 @@ class OrderController extends Controller
 
             $order_detail->save();
         }
-
-
 
         return response()->json([
             'status' => true,

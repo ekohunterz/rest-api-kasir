@@ -23,8 +23,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::get('/products', [ProductController::class, 'index']);
-Route::get('/categories', [CategoryController::class, 'index']);
+Route::apiResource('products', ProductController::class);
+Route::apiResource('/categories', CategoryController::class);
 
 Route::get('/carts', [CartController::class, 'index']);
 
@@ -38,5 +38,3 @@ Route::get('/orders', [OrderController::class, 'index']);
 Route::get('/orders/{id}', [OrderController::class, 'show']);
 
 Route::post('/orders', [OrderController::class, 'store']);
-
-
