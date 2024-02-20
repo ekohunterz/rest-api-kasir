@@ -8,6 +8,14 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['permission:general|read'])->only(['index', 'show']);
+        $this->middleware(['permission:create'])->only(['store']);
+        $this->middleware(['permission:update'])->only(['update']);
+        $this->middleware(['permission:delete'])->only(['destroy']);
+    }
+
     public function index()
     {
         $categories = Category::query();
