@@ -34,6 +34,8 @@ class CategoryController extends Controller
         $category->name = $request->name;
 
         $category->save();
+
+        return new CategoryResource($category);
     }
 
     public function show($id)
@@ -67,6 +69,6 @@ class CategoryController extends Controller
 
         $category->delete();
 
-        return new CategoryResource($category);
+        return response()->json(null, 204);
     }
 }
