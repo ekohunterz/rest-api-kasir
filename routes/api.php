@@ -4,6 +4,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReportController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/orders/{id}', [OrderController::class, 'show']);
 
     Route::post('/orders', [OrderController::class, 'store']);
+    Route::get('/reports', [ReportController::class, 'index']);
 });
 
 
