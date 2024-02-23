@@ -33,6 +33,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/reports', [ReportController::class, 'index']);
+    Route::get('/export-yearly', [ReportController::class, 'exportYearlyReportToExcel']);
+    Route::get('/export-monthly', [ReportController::class, 'exportMonthlyReportToExcel']);
 });
 
 

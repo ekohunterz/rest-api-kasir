@@ -6,6 +6,7 @@ use App\Http\Requests\OrderRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -22,10 +23,17 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        $orders = order::with('order_detail.product');
+        $date = $request->date;
+
+
+        $orders = order::with('order_detail.product')->orderBy('created_at', 'desc');
 
         if (request('search')) {
             $orders = $orders->where('invoice', 'like', '%' . request('search') . '%');
+        }
+
+        if (request('date')) {
+            $orders = $orders->whereMonth('created_at', Carbon::parse($date)->month)->whereYear('created_at', Carbon::parse($date)->year);
         }
 
 
