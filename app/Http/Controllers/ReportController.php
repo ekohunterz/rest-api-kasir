@@ -47,8 +47,8 @@ class ReportController extends Controller
         $income = $order->sum('total_pay');
         $incomeYesterday = $orderYesterday->sum('total_pay');
 
-        $percentageSold = ($productSold - $productSoldYesterday) / $productSoldYesterday * 100;
-        $percentageIncome = ($income - $incomeYesterday) / $incomeYesterday * 100;
+        $percentageSold = $productSoldYesterday != 0 ? (($productSold - $productSoldYesterday) / $productSoldYesterday * 100) : 0;
+        $percentageIncome = $incomeYesterday != 0 ? (($income - $incomeYesterday) / $incomeYesterday * 100) : 0;
         return collect([
             'today' => ['productSold' => $productSold, 'income' => $income, 'date' => $today],
             'yesterday' => ['productSold' => $productSoldYesterday, 'income' => $incomeYesterday, 'date' => $yesterday],
@@ -124,8 +124,14 @@ class ReportController extends Controller
             $income = $orders->sum('total_pay');
 
             // Menyimpan data penjualan untuk setiap hari dalam bulan
-            $monthlyData[$day] = ['productSold' => $productSold, 'income' => $income, 'date' => Carbon::create($year, $month, $day)->format('d F, Y')];
+            $monthlyData[] = [
+                'productSold' => $productSold,
+                'income' => $income,
+                'date' => Carbon::create($year, $month, $day)->format('d F, Y')
+            ];
         }
+
+        $bestSelling = $this->bestSelling(null, $parsedMonth, 10);
 
         // Menghitung total penjualan dan pendapatan untuk bulan tersebut
         $totalProductSold = collect($monthlyData)->sum('productSold');
@@ -194,14 +200,14 @@ class ReportController extends Controller
     {
         $year = $request->year ?? Carbon::now()->year;
 
-        // Panggil fungsi untuk mendapatkan data laporan tahunan
+
         $yearlyReportData = $this->yearlyReports($year);
 
-        // Buat objek Spreadsheet
+
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Isi data laporan tahunan ke dalam file Excel
+
         $sheet->setCellValue('A1', 'Laporan Tahunan ' . $year);
         $sheet->setCellValue('A2', 'Tanggal');
         $sheet->setCellValue('B2', 'Produk Terjual');
@@ -215,13 +221,13 @@ class ReportController extends Controller
             $row++;
         }
 
-        // Simpan file Excel
+
         $writer = new Xlsx($spreadsheet);
         $filename = 'laporan_tahunan_' . $year . '.xlsx';
         $path = storage_path('exports/' . $filename);
         $writer->save($path);
 
-        // Kirim file Excel sebagai respons
+
         return response()->download($path, $filename)->deleteFileAfterSend(true);
     }
 
@@ -230,14 +236,14 @@ class ReportController extends Controller
 
         $month = $request->month ?? Carbon::now()->month;
 
-        // Panggil fungsi untuk mendapatkan data laporan bulanan
+
         $monthlyReportData = $this->monthlyReports($month);
 
-        // Buat objek Spreadsheet
+
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Isi data laporan bulanan ke dalam file Excel
+
         $sheet->setCellValue('A1', 'Laporan Bulanan ' . '- ' . $month);
         $sheet->setCellValue('A2', 'Tanggal');
         $sheet->setCellValue('B2', 'Produk Terjual');
@@ -257,13 +263,13 @@ class ReportController extends Controller
 
 
 
-        // Simpan file Excel
+
         $writer = new Xlsx($spreadsheet);
         $filename = 'laporan_bulanan_'  . Carbon::createFromFormat('Y/m', $month)->format('F Y') . '.xlsx';
         $path = storage_path('exports/' . $filename);
         $writer->save($path);
 
-        // Kirim file Excel sebagai respons
+
         return response()->download($path, $filename)->deleteFileAfterSend(true);
     }
 }
